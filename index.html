@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="skillApp">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AngularJS – Global Theme Switcher (Orange / Red+Black)</title>
+
+    <!-- AngularJS & dependencies -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js">
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js">
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js">
+    </script>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* --------------------------------------------
+           CSS CUSTOM PROPERTIES (themes)
+        -------------------------------------------- */
+        :root {
+            /* Default (light/orange) */
+            --bg-body: #fef9f4;
+            --bg-card: #ffffff;
+            --bg-header: #e67e22;
+            --bg-header-gradient: linear-gradient(145deg, #d35400, #e67e22);
+            --text-primary: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #f0e0d0;
+            --shadow: 0 4px 16px rgba(0,0,0,.06);
+            --btn-primary-bg: #e67e22;
+            --btn-primary-hover: #d35400;
+            --badge-bg: #fdebd0;
+            --badge-color: #a04000;
+            --task-bg: #fef5ed;
+            --task-border: #f0e0d0;
+            --link-color: #e67e22;
+            --input-border: #d5c0b0;
+            --input-focus: #e67e22;
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+
+        /* Light mode (explicit) – orange */
+        .theme-light {
+            --bg-body: #fef9f4;
+            --bg-card: #ffffff;
+            --bg-header: #e67e22;
+            --bg-header-gradient: linear-gradient(145deg, #d35400, #e67e22);
+            --text-primary: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #f0e0d0;
+            --shadow: 0 4px 16px rgba(0,0,0,.06);
+            --btn-primary-bg: #e67e22;
+            --btn-primary-hover: #d35400;
+            --badge-bg: #fdebd0;
+            --badge-color: #a04000;
+            --task-bg: #fef5ed;
+            --task-border: #f0e0d0;
+            --link-color: #e67e22;
+            --input-border: #d5c0b0;
+            --input-focus: #e67e22;
+            --success: #27ae60;
+            --danger: #e74c3c;
+        }
+
+        /* Dark mode – red & black */
+        .theme-dark {
+            --bg-body: #1a1a1a;
+            --bg-card: #2d2d2d;
+            --bg-header: #8b0000;
+            --bg-header-gradient: linear-gradient(145deg, #4a0000, #8b0000);
+            --text-primary: #ecf0f1;
+            --text-muted: #b0b0b0;
+            --border-color: #3d3d3d;
+            --shadow: 0 4px 16px rgba(0,0,0,.6);
+            --btn-primary-bg: #c0392b;
+            --btn-primary-hover: #e74c3c;
+            --badge-bg: #3d1a1a;
+            --badge-color: #f5b7b1;
+            --task-bg: #2a2a2a;
+            --task-border: #3d3d3d;
+            --link-color: #e74c3c;
+            --input-border: #4d4d4d;
+            --input-focus: #e74c3c;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+        }
+
+        /* --------------------------------------------
+           RESET & BASE
+        -------------------------------------------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        a {
+            text-decoration: none;
+            color: var(--link-color);
+        }
+
+        .app-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 40px;
+        }
+
+        /* --------------------------------------------
+           HEADER (theme‑aware)
+        -------------------------------------------- */
+        .app-header {
+            background: var(--bg-header-gradient);
+            color: #fff;
+            padding: 28px 32px;
+            border-radius: 0 0 28px 28px;
+            margin: 0 -24px 32px;
+            box-shadow: 0 12px 40px rgba(0,0,0,.25);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s;
+        }
+        .app-header .brand i {
+            font-size: 2rem;
+            color: #fff;
+            opacity: 0.9;
+        }
+        .app-header .brand h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -.5px;
+        }
+        .app-header .brand small {
+            font-weight: 400;
+            font-size: .85rem;
+            opacity: .8;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: rgba(255,255,255,.15);
+            padding: 6px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+        }
+        .nav-links a {
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: .92rem;
+            transition: all .25s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,.8);
+        }
+        .nav-links a i { font-size: 1rem; }
+        .nav-links a:hover {
+            background: rgba(255,255,255,.2);
+            color: #fff;
+        }
+        .nav-links a.active {
+            background: #fff;
+            color: #1a3350;
+            box-shadow: 0 6px 18px rgba(0,0,0,.15);
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            background: rgba(255,255,255,.2);
+            border: none;
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-toggle:hover {
+            background: rgba(255,255,255,.35);
+            transform: scale(1.05);
+        }
+
+        /* --------------------------------------------
+           VIEW ANIMATION (ngAnimate)
+        -------------------------------------------- */
+        .view-animate {
+            transition: all .35s ease;
+        }
+        .view-animate.ng-enter {
+            opacity: 0;
+            transform: translateY(24px) scale(.98);
+        }
+        .view-animate.ng-enter-active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .view-animate.ng-leave {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .view-animate.ng-leave-active {
+            opacity: 0;
+            transform: translateY(-20px) scale(.97);
+        }
+
+        /* --------------------------------------------
+           CARDS & UTILITY (theme variables)
+        -------------------------------------------- */
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: background 0.3s, border 0.3s;
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+        }
+        .card-title i {
+            color: var(--link-color);
+            font-size: 1.3rem;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+        .mt-24 { margin-top: 24px; }
+        .mt-16 { margin-top: 16px; }
+        .text-muted { color: var(--text-muted); }
+
+        .badge {
+            display: inline-block;
+            background: var(--badge-bg);
+            color: var(--badge-color);
+            padding: 3px 14px;
+            border-radius: 30px;
+            font-size: .78rem;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: #d5f5e3;
+            color: #1a7a42;
+        }
+        .badge-danger {
+            background: #fadbd8;
+            color: #922b21;
+        }
+        .badge-warning {
+            background: #fdebd0;
+            color: #a04000;
+        }
+        .theme-dark .badge-success {
+            background: #1e4a3a;
+            color: #82e0aa;
+        }
+        .theme-dark .badge-danger {
+            background: #4a1a1a;
+            color: #f5b7b1;
+        }
+        .theme-dark .badge-warning {
+            background: #3d2a1a;
+            color: #f5b7b1;
+        }
+
+        /* --------------------------------------------
+           FORMS (theme variables)
+        -------------------------------------------- */
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: .88rem;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 14px;
+            font-size: .95rem;
+            font-family: inherit;
+            transition: border .2s, box-shadow .2s;
+            background: var(--bg-body);
+            color: var(--text-primary);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px rgba(230, 126, 34, .15);
+        }
+        .form-control.ng-invalid.ng-touched {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, .10);
+        }
+        .form-control.ng-valid.ng-touched {
+            border-color: var(--success);
+        }
+        .help-block {
+            color: var(--danger);
+            font-size: .82rem;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 28px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: .92rem;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: var(--btn-primary-bg);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--btn-primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.2);
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #1e8449;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .btn-outline:hover {
+            border-color: var(--link-color);
+            background: var(--bg-body);
+        }
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: .8rem;
+        }
+
+        /* --------------------------------------------
+           TASK LIST (theme variables)
+        -------------------------------------------- */
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: var(--task-bg);
+            border: 1px solid var(--task-border);
+            margin-bottom: 10px;
+            transition: all .2s ease;
+        }
+        .task-item:hover {
+            background: var(--bg-card);
+            border-color: var(--link-color);
+        }
+        .task-item .task-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+        .task-item .task-info .task-check {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--link-color);
+            cursor: pointer;
+        }
+        .task-item .task-info .task-text {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .task-item .task-info .task-text.done {
+            text-decoration: line-through;
+            opacity: .5;
+        }
+        .task-item .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .task-item .task-priority {
+            font-size: .7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            padding: 2px 12px;
+            border-radius: 30px;
+        }
+        .priority-high {
+            background: #fadbd8;
+            color: #922b21;
+        }
+        .priority-medium {
+            background: #fdebd0;
+            color: #a04000;
+        }
+        .priority-low {
+            background: #d5f5e3;
+            color: #1a7a42;
+        }
+        .theme-dark .priority-high {
+            background: #4a1a1a;
+            color: #f5b7b1;
+        }
+        .theme-dark .priority-medium {
+            background: #3d2a1a;
+            color: #f5b7b1;
+        }
+        .theme-dark .priority-low {
+            background: #1a3a2a;
+            color: #82e0aa;
+        }
+
+        /* --------------------------------------------
+           CUSTOM DIRECTIVE: hello-world (theme aware)
+        -------------------------------------------- */
+        hello-world {
+            display: block;
+            background: var(--task-bg);
+            padding: 18px 24px;
+            border-radius: 16px;
+            border-left: 6px solid var(--link-color);
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        hello-world .greeting {
+            font-size: 1.2rem;
+        }
+        hello-world .greeting strong {
+            color: var(--link-color);
+        }
+
+        /* --------------------------------------------
+           LIVE CLOCK
+        -------------------------------------------- */
+        .live-clock {
+            font-size: 2.2rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            background: var(--task-bg);
+            padding: 8px 24px;
+            border-radius: 60px;
+            display: inline-block;
+            border: 2px solid var(--border-color);
+        }
+
+        .filter-pill {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 30px;
+            background: var(--badge-bg);
+            color: var(--badge-color);
+            margin: 3px 4px 3px 0;
+            font-size: .82rem;
+            font-weight: 500;
+        }
+
+        /* --------------------------------------------
+           THEME BOX (for directives demo – still works)
+        -------------------------------------------- */
+        .theme-box {
+            padding: 16px 20px;
+            border-radius: 14px;
+            border: 2px solid var(--border-color);
+            transition: all .3s ease;
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+        .bg-light {
+            background: #fef9f4 !important;
+            color: #2c3e50 !important;
+        }
+        .bg-dark {
+            background: #1a1a1a !important;
+            color: #ecf0f1 !important;
+        }
+        .text-dark { color: #2c3e50 !important; }
+        .text-white { color: #ecf0f1 !important; }
+
+        /* --------------------------------------------
+           RESPONSIVE
+        -------------------------------------------- */
+        @media (max-width: 900px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .app-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 18px;
+                padding: 22px 20px;
+            }
+            .header-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .nav-links {
+                border-radius: 20px;
+                justify-content: center;
+                gap: 4px;
+            }
+            .nav-links a {
+                padding: 8px 16px;
+                font-size: .82rem;
+            }
+            .nav-links a i { display: none; }
+            .theme-toggle {
+                align-self: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .app-shell { padding: 0 12px 30px; }
+            .app-header { margin: 0 -12px 24px; border-radius: 0 0 20px 20px; }
+            .card { padding: 20px 18px; }
+        }
+    </style>
+</head>
+
+<!-- FIX: attach controller to body so ng-class can access themeService -->
+<body ng-controller="AppController as app" ng-class="app.themeService.currentTheme">
+
+    <div class="app-shell">
+
+        <header class="app-header">
+            <div class="brand">
+                <i class="fas fa-palette"></i>
+                <div>
+                    <h1>ngShowcase</h1>
+                    <small>Global theme switcher – Orange / Red+Black</small>
+                </div>
+            </div>
+            <div class="header-controls">
+                <nav class="nav-links">
+                    <a href="#!/" ng-class="{ active: app.activeTab === 'home' }">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                    <a href="#!/tasks" ng-class="{ active: app.activeTab === 'tasks' }">
+                        <i class="fas fa-tasks"></i> Tasks
+                    </a>
+                    <a href="#!/directives" ng-class="{ active: app.activeTab === 'directives' }">
+                        <i class="fas fa-code"></i> Directives
+                    </a>
+                    <a href="#!/contact" ng-class="{ active: app.activeTab === 'contact' }">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a>
+                </nav>
+                <!-- toggle button calls app.toggleTheme() -->
+                <button class="theme-toggle" ng-click="app.toggleTheme()" title="Toggle theme">
+                    <i class="fas" ng-class="{'fa-sun': app.themeService.currentTheme === 'theme-light', 'fa-moon': app.themeService.currentTheme === 'theme-dark'}"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="page-wrap">
+            <ng-view class="view-animate"></ng-view>
+        </div>
+
+        <footer style="margin-top:48px; text-align:center; color:var(--text-muted); font-size:.82rem; border-top:1px solid var(--border-color); padding-top:24px;">
+            <i class="fas fa-angular" style="color:#b52e31;"></i>
+            AngularJS 1.8 · built with &hearts; · {{ app.currentDate | date:'fullDate' }}
+        </footer>
+    </div>
+
+    <!-- ============================================================
+    ANGULAR MODULE & CONFIG
+    ============================================================ -->
+    <script>
+        // 1. Module
+        const app = angular.module('skillApp', ['ngRoute', 'ngAnimate']);
+
+        // 2. Theme Service – global
+        app.service('ThemeService', function() {
+            let current = 'theme-light'; // default
+
+            this.getTheme = function() { return current; };
+            this.toggle = function() {
+                current = (current === 'theme-light') ? 'theme-dark' : 'theme-light';
+                return current;
+            };
+            // Expose as property for easy binding
+            this.currentTheme = current;
+            // Update property on toggle
+            const self = this;
+            this.toggleAndUpdate = function() {
+                self.toggle();
+                self.currentTheme = current;
+                return current;
+            };
+        });
+
+        // 3. Routing
+        app.config(['$routeProvider', function($routeProvider) {
+            $routeProvider
+                .when('/', {
+                    templateUrl: 'views/home.html',
+                    controller: 'HomeController',
+                    controllerAs: 'home'
+                })
+                .when('/tasks', {
+                    templateUrl: 'views/tasks.html',
+                    controller: 'TasksController',
+                    controllerAs: 'tasks'
+                })
+                .when('/directives', {
+                    templateUrl: 'views/directives.html',
+                    controller: 'DirectivesController',
+                    controllerAs: 'd'
+                })
+                .when('/contact', {
+                    templateUrl: 'views/contact.html',
+                    controller: 'ContactController',
+                    controllerAs: 'contact'
+                })
+                .otherwise({ redirectTo: '/' });
+        }]);
+
+        // 4. App Controller (global) – now attached to body
+        app.controller('AppController', ['$scope', '$location', 'ThemeService', function($scope, $location, ThemeService) {
+            const vm = this;
+            vm.activeTab = 'home';
+            vm.currentDate = new Date();
+            vm.themeService = ThemeService; // expose to view
+
+            vm.toggleTheme = function() {
+                ThemeService.toggleAndUpdate();
+                // force digest – though ng-class should pick it up automatically
+                if (!angular.element(document).scope().$$phase) {
+                    angular.element(document).scope().$apply();
+                }
+                console.log('[App] Theme toggled to:', ThemeService.currentTheme);
+            };
+
+            $scope.$on('$routeChangeSuccess', function() {
+                const path = $location.path();
+                if (path === '/') vm.activeTab = 'home';
+                else if (path === '/tasks') vm.activeTab = 'tasks';
+                else if (path === '/directives') vm.activeTab = 'directives';
+                else if (path === '/contact') vm.activeTab = 'contact';
+            });
+
+            console.log('[App] AppController loaded');
+        }]);
+
+        // 5. Custom Filters
+        app.filter('capitalize', function() {
+            return function(input) {
+                if (!input) return '';
+                return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+            };
+        });
+        app.filter('truncate', function() {
+            return function(input, limit) {
+                if (!input) return '';
+                limit = limit || 20;
+                return input.length > limit ? input.slice(0, limit) + '…' : input;
+            };
+        });
+
+        // 6. Custom Directives
+        app.directive('helloWorld', function() {
+            return {
+                restrict: 'E',
+                scope: { name: '@' },
+                template: `
+                    <div class="greeting">
+                        <i class="fas fa-hand-peace" style="margin-right:10px;color:var(--link-color);"></i>
+                        Hello, <strong>{{ name || 'Guest' }}</strong>!
+                        <span style="font-weight:400;color:var(--text-muted);">
+                            — custom directive <span class="badge">E</span>
+                        </span>
+                    </div>
+                    <div style="font-size:.85rem;color:var(--text-muted);margin-top:4px;">
+                        <i class="fas fa-code"></i> <code>hello-world</code> with isolate scope
+                    </div>
+                `
+            };
+        });
+        app.directive('skillTag', function() {
+            return {
+                restrict: 'E',
+                transclude: true,
+                scope: { level: '@' },
+                template: `
+                    <span class="filter-pill" ng-class="{
+                      'badge-success': level === 'advanced',
+                      'badge-warning': level === 'intermediate',
+                      'badge-danger': level === 'beginner'
+                    }">
+                      <ng-transclude></ng-transclude>
+                      <span style="font-weight:400;opacity:.7;margin-left:4px;">· {{ level }}</span>
+                    </span>
+                `
+            };
+        });
+
+        // 7. Service – Task Data
+        app.service('TaskService', function() {
+            let tasks = [
+                { id: 1, title: 'Learn AngularJS', done: true, priority: 'high' },
+                { id: 2, title: 'Build a single-page app', done: false, priority: 'medium' },
+                { id: 3, title: 'Write unit tests', done: false, priority: 'low' },
+                { id: 4, title: 'Deploy to production', done: false, priority: 'high' }
+            ];
+            let nextId = 5;
+
+            this.getAll = function() { return tasks; };
+            this.add = function(title, priority) {
+                if (!title || !title.trim()) return false;
+                const newTask = {
+                    id: nextId++,
+                    title: title.trim(),
+                    done: false,
+                    priority: priority || 'medium'
+                };
+                tasks.push(newTask);
+                return true;
+            };
+            this.remove = function(id) {
+                const idx = tasks.findIndex(t => t.id === id);
+                if (idx > -1) { tasks.splice(idx, 1); return true; }
+                return false;
+            };
+            this.getStats = function() {
+                const total = tasks.length;
+                const done = tasks.filter(t => t.done).length;
+                return { total, done, pending: total - done };
+            };
+        });
+
+        // 8. Home Controller
+        app.controller('HomeController', ['TaskService', '$interval', '$scope', function(TaskService, $interval, $scope) {
+            const vm = this;
+            vm.stats = TaskService.getStats();
+            vm.greeting = 'Welcome to ngShowcase';
+            vm.userName = 'Developer';
+            vm.clock = new Date();
+
+            const timer = $interval(function() { vm.clock = new Date(); }, 1000);
+            $scope.$on('$destroy', function() { $interval.cancel(timer); });
+
+            vm.features = [
+                { name: 'Two-way Data Binding', icon: 'fa-arrows-left-right' },
+                { name: 'Routing with ngRoute', icon: 'fa-route' },
+                { name: 'Custom Directives', icon: 'fa-puzzle-piece' },
+                { name: 'Services & DI', icon: 'fa-cubes' },
+                { name: 'Filters (built-in & custom)', icon: 'fa-filter' },
+                { name: 'Form Validation', icon: 'fa-check-circle' },
+                { name: 'Animations (ngAnimate)', icon: 'fa-play' },
+                { name: 'ng-repeat & conditional', icon: 'fa-list' }
+            ];
+        }]);
+
+        // 9. Tasks Controller
+        app.controller('TasksController', ['TaskService', function(TaskService) {
+            const vm = this;
+            vm.tasks = TaskService.getAll();
+            vm.newTaskTitle = '';
+            vm.newTaskPriority = 'medium';
+            vm.filterPriority = '';
+            vm.searchQuery = '';
+            vm.stats = TaskService.getStats();
+
+            vm.addTask = function() {
+                if (TaskService.add(vm.newTaskTitle, vm.newTaskPriority)) {
+                    vm.newTaskTitle = '';
+                    vm.newTaskPriority = 'medium';
+                    vm.updateStats();
+                }
+            };
+            vm.removeTask = function(id) {
+                if (TaskService.remove(id)) vm.updateStats();
+            };
+            vm.updateStats = function() {
+                vm.stats = TaskService.getStats();
+                if (!angular.element(document).scope().$$phase) {
+                    angular.element(document).scope().$apply();
+                }
+            };
+
+            vm.shouldShowTask = function(task) {
+                if (vm.filterPriority && task.priority !== vm.filterPriority) return false;
+                if (vm.searchQuery && !task.title.toLowerCase().includes(vm.searchQuery.toLowerCase())) return false;
+                return true;
+            };
+            vm.priorityClass = function(p) { return 'priority-' + p; };
+            vm.getFilteredCount = function() {
+                return vm.tasks.filter(vm.shouldShowTask).length;
+            };
+        }]);
+
+        // 10. Directives Controller
+        app.controller('DirectivesController', function() {
+            const vm = this;
+            vm.person = {
+                name: 'Alex Rivera',
+                role: 'Senior Developer',
+                skills: ['AngularJS', 'React', 'Node.js', 'Python', 'Docker']
+            };
+            vm.showExtra = true;
+            vm.theme = 'light';
+
+            vm.toggleExtra = function() { vm.showExtra = !vm.showExtra; };
+            vm.toggleTheme = function() { vm.theme = vm.theme === 'light' ? 'dark' : 'light'; };
+            vm.themeClasses = function() {
+                return {
+                    'bg-light': vm.theme === 'light',
+                    'bg-dark': vm.theme === 'dark',
+                    'text-dark': vm.theme === 'light',
+                    'text-white': vm.theme === 'dark'
+                };
+            };
+        });
+
+        // 11. Contact Controller
+        app.controller('ContactController', function() {
+            const vm = this;
+            vm.user = { name: '', email: '', message: '', agree: false };
+            vm.submitted = false;
+            vm.submitSuccess = false;
+
+            vm.submitForm = function(isValid) {
+                vm.submitted = true;
+                if (isValid) {
+                    vm.submitSuccess = true;
+                    console.log('[Contact] Form submitted (demo) – data:', vm.user);
+                    setTimeout(function() {
+                        vm.submitSuccess = false;
+                        vm.submitted = false;
+                        vm.user = { name: '', email: '', message: '', agree: false };
+                        const scope = angular.element(document).scope();
+                        if (!scope.$$phase) scope.$apply();
+                    }, 3000);
+                }
+            };
+        });
+
+        // 12. Run block
+        app.run(['$rootScope', function($rootScope) {
+            $rootScope.$on('$routeChangeError', function(e, c, p, rejection) {
+                console.error('[Route] Error:', rejection);
+            });
+            console.log('[App] Angular app started');
+        }]);
+    </script>
+
+    <!-- ============================================================
+    INLINE TEMPLATES
+    ============================================================ -->
+
+    <!-- HOME VIEW -->
+    <script type="text/ng-template" id="views/home.html">
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-user-astronaut"></i> Dashboard
+                    </div>
+                    <p style="margin-bottom:16px;">
+                        <strong>{{ home.greeting }}</strong> — demonstrates
+                        <span class="badge">data binding</span>
+                        <span class="badge">filters</span>
+                        <span class="badge">services</span>
+                    </p>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-pen"></i> Your name (two-way)</label>
+                        <input class="form-control" type="text" ng-model="home.userName" placeholder="Type your name…" />
+                    </div>
+                    <p style="font-size:1.1rem;">
+                        👋 Hello, <strong>{{ home.userName | capitalize }}</strong>!
+                        <span style="font-size:.85rem;color:var(--text-muted);">(capitalize filter)</span>
+                    </p>
+
+                    <div style="margin-top:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                        <span style="font-weight:600;"><i class="far fa-clock"></i> Live clock:</span>
+                        <span class="live-clock">{{ home.clock | date:'HH:mm:ss' }}</span>
+                        <span style="font-size:.8rem;color:var(--text-muted);">(date filter + $interval)</span>
+                    </div>
+                </div>
+
+                <div class="card mt-24">
+                    <div class="card-title">
+                        <i class="fas fa-chart-simple"></i> Task Stats
+                        <span class="badge" style="margin-left:auto;">from Service</span>
+                    </div>
+                    <div style="display:flex;gap:32px;flex-wrap:wrap;">
+                        <div><span style="font-size:2rem;font-weight:700;">{{ home.stats.total }}</span><br /><span class="text-muted">Total</span></div>
+                        <div><span style="font-size:2rem;font-weight:700;color:var(--success);">{{ home.stats.done }}</span><br /><span class="text-muted">Done</span></div>
+                        <div><span style="font-size:2rem;font-weight:700;color:var(--danger);">{{ home.stats.pending }}</span><br /><span class="text-muted">Pending</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-star"></i> Skills Showcase
+                    <span class="badge" style="margin-left:auto;">{{ home.features.length }} items</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div ng-repeat="feat in home.features" style="background:var(--task-bg);padding:12px 14px;border-radius:12px;border:1px solid var(--border-color);display:flex;align-items:center;gap:10px;">
+                        <i class="fas {{ feat.icon }}" style="color:var(--link-color);width:20px;"></i>
+                        <span style="font-size:.9rem;font-weight:500;">{{ feat.name }}</span>
+                    </div>
+                </div>
+                <p style="margin-top:18px;font-size:.88rem;color:var(--text-muted);">
+                    <i class="fas fa-arrow-right"></i> Explore all features via navigation.
+                </p>
+            </div>
+        </div>
+    </script>
+
+    <!-- TASKS VIEW -->
+    <script type="text/ng-template" id="views/tasks.html">
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-plus-circle"></i> Add Task
+                        <span class="badge" style="margin-left:auto;">ng-click</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Task title</label>
+                        <input class="form-control" type="text" ng-model="tasks.newTaskTitle" placeholder="What needs to be done?" />
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select class="form-control" ng-model="tasks.newTaskPriority">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success" ng-click="tasks.addTask()">
+                        <i class="fas fa-plus"></i> Add Task
+                    </button>
+                    <div style="margin-top:10px;font-size:.85rem;color:var(--text-muted);">
+                        <i class="fas fa-info-circle"></i> Click the button or press Enter.
+                    </div>
+                </div>
+
+                <div class="card mt-24">
+                    <div class="card-title">
+                        <i class="fas fa-sliders-h"></i> Filters
+                        <span class="badge" style="margin-left:auto;">ng-show</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Search</label>
+                        <input class="form-control" type="text" ng-model="tasks.searchQuery" placeholder="Filter by title…" ng-change="tasks.updateStats()" />
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select class="form-control" ng-model="tasks.filterPriority" ng-change="tasks.updateStats()">
+                            <option value="">All</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <span class="badge" ng-class="{'badge-success':!tasks.filterPriority}">
+                            {{ tasks.getFilteredCount() }} tasks shown
+                        </span>
+                        <span class="badge" ng-if="tasks.filterPriority">
+                            <i class="fas fa-filter"></i> {{ tasks.filterPriority | capitalize }}
+                        </span>
+                        <span class="badge" ng-if="tasks.searchQuery">
+                            <i class="fas fa-search"></i> "{{ tasks.searchQuery }}"
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-list-check"></i> Task List
+                    <span class="badge" style="margin-left:auto;">{{ tasks.getFilteredCount() }}</span>
+                </div>
+
+                <div ng-if="tasks.getFilteredCount() === 0" style="text-align:center;padding:30px 0;color:var(--text-muted);">
+                    <i class="fas fa-inbox" style="font-size:2.4rem;opacity:.3;"></i>
+                    <p style="margin-top:8px;">No tasks match your filters.</p>
+                </div>
+
+                <div ng-repeat="task in tasks.tasks | orderBy: 'priority' track by task.id"
+                     class="task-item"
+                     ng-show="tasks.shouldShowTask(task)"
+                     ng-class="{'done': task.done}">
+                    <div class="task-info">
+                        <input type="checkbox" class="task-check" ng-model="task.done" ng-click="tasks.updateStats()" />
+                        <span class="task-text" ng-class="{'done': task.done}">
+                            {{ task.title | truncate:35 }}
+                        </span>
+                        <span class="task-priority {{ tasks.priorityClass(task.priority) }}">
+                            {{ task.priority }}
+                        </span>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-danger btn-sm" ng-click="tasks.removeTask(task.id)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-color);display:flex;justify-content:space-between;flex-wrap:wrap;">
+                    <span class="text-muted"><i class="fas fa-check-circle" style="color:var(--success);"></i> {{ tasks.stats.done }} done</span>
+                    <span class="text-muted"><i class="fas fa-circle" style="color:var(--danger);"></i> {{ tasks.stats.pending }} pending</span>
+                    <span class="text-muted"><i class="fas fa-tasks"></i> {{ tasks.stats.total }} total</span>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- DIRECTIVES VIEW -->
+    <script type="text/ng-template" id="views/directives.html">
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-puzzle-piece"></i> Custom Directive
+                        <span class="badge" style="margin-left:auto;">hello-world</span>
+                    </div>
+                    <hello-world name="d.person.name"></hello-world>
+                    <div style="margin-top:14px;">
+                        <hello-world name="'AngularJS Enthusiast'"></hello-world>
+                    </div>
+                    <p style="margin-top:14px;font-size:.88rem;color:var(--text-muted);">
+                        <i class="fas fa-info-circle"></i> <code>hello-world</code> uses isolate scope (<code>@</code>) and a custom template.
+                    </p>
+                </div>
+
+                <div class="card mt-24">
+                    <div class="card-title">
+                        <i class="fas fa-tags"></i> Transclusion
+                        <span class="badge" style="margin-left:auto;">skill-tag</span>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        <skill-tag level="advanced">AngularJS</skill-tag>
+                        <skill-tag level="intermediate">React</skill-tag>
+                        <skill-tag level="beginner">Vue</skill-tag>
+                        <skill-tag level="advanced">Node.js</skill-tag>
+                        <skill-tag level="intermediate">Docker</skill-tag>
+                    </div>
+                    <p style="margin-top:14px;font-size:.88rem;color:var(--text-muted);">
+                        <i class="fas fa-info-circle"></i> <code>skill-tag</code> uses transclusion and dynamic classes.
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-magic"></i> Directives
+                        <span class="badge" style="margin-left:auto;">ng-class / ng-if</span>
+                    </div>
+
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                        <button class="btn btn-primary btn-sm" ng-click="d.toggleExtra()">
+                            <i class="fas" ng-class="{'fa-eye': d.showExtra, 'fa-eye-slash': !d.showExtra}"></i>
+                            {{ d.showExtra ? 'Hide' : 'Show' }} extra
+                        </button>
+                        <button class="btn btn-outline btn-sm" ng-click="d.toggleTheme()">
+                            <i class="fas" ng-class="{'fa-sun': d.theme==='light', 'fa-moon': d.theme==='dark'}"></i>
+                            {{ d.theme | capitalize }} theme
+                        </button>
+                    </div>
+
+                    <div class="theme-box" ng-class="d.themeClasses()">
+                        <p><strong>Theme:</strong> {{ d.theme | capitalize }}</p>
+                        <p ng-if="d.showExtra">
+                            <i class="fas fa-check-circle" style="color:var(--success);"></i>
+                            Extra content visible — powered by <code>ng-if</code>.
+                            <span class="badge">ng-show would also work</span>
+                        </p>
+                        <p ng-hide="d.showExtra" style="color:var(--text-muted);">
+                            <i class="fas fa-eye-slash"></i> Extra content hidden (<code>ng-hide</code>).
+                        </p>
+                    </div>
+
+                    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                        <span class="badge" ng-class="{'badge-success': d.showExtra, 'badge-danger': !d.showExtra}">
+                            {{ d.showExtra ? 'Visible' : 'Hidden' }}
+                        </span>
+                        <span class="badge" ng-class="{'badge-success': d.theme==='light', 'badge-warning': d.theme==='dark'}">
+                            {{ d.theme }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card mt-24">
+                    <div class="card-title">
+                        <i class="fas fa-user"></i> Profile
+                        <span class="badge" style="margin-left:auto;">filters</span>
+                    </div>
+                    <p><strong>Name:</strong> {{ d.person.name | uppercase }}</p>
+                    <p><strong>Role:</strong> {{ d.person.role | capitalize }}</p>
+                    <p><strong>Skills:</strong>
+                        <span ng-repeat="skill in d.person.skills">
+                            <span class="filter-pill">{{ skill | truncate:12 }}</span>
+                        </span>
+                    </p>
+                    <p><span class="text-muted">Uppercase, capitalize, truncate filters</span></p>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- CONTACT VIEW -->
+    <script type="text/ng-template" id="views/contact.html">
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title">
+                    <i class="fas fa-paper-plane"></i> Contact Form
+                    <span class="badge" style="margin-left:auto;">validation</span>
+                </div>
+
+                <form name="contactForm" ng-submit="contact.submitForm(contactForm.$valid)" novalidate>
+
+                    <div class="form-group" ng-class="{'has-error': contactForm.name.$invalid && contact.submitted}">
+                        <label><i class="fas fa-user"></i> Name *</label>
+                        <input class="form-control" type="text" name="name" ng-model="contact.user.name"
+                               placeholder="Your full name" required />
+                        <div class="help-block" ng-if="contactForm.name.$invalid && contact.submitted">
+                            <i class="fas fa-exclamation-circle"></i> Name is required.
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-class="{'has-error': contactForm.email.$invalid && contact.submitted}">
+                        <label><i class="fas fa-envelope"></i> Email *</label>
+                        <input class="form-control" type="email" name="email" ng-model="contact.user.email"
+                               placeholder="you@example.com" required />
+                        <div class="help-block" ng-if="contactForm.email.$invalid && contact.submitted">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span ng-if="contactForm.email.$error.required">Email is required.</span>
+                            <span ng-if="contactForm.email.$error.email">Please enter a valid email.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" ng-class="{'has-error': contactForm.message.$invalid && contact.submitted}">
+                        <label><i class="fas fa-comment"></i> Message *</label>
+                        <textarea class="form-control" name="message" rows="3" ng-model="contact.user.message"
+                                  placeholder="Your message…" required></textarea>
+                        <div class="help-block" ng-if="contactForm.message.$invalid && contact.submitted">
+                            <i class="fas fa-exclamation-circle"></i> Message is required.
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display:flex;align-items:center;gap:10px;font-weight:400;">
+                            <input type="checkbox" ng-model="contact.user.agree" required />
+                            I agree to the terms
+                            <span style="color:var(--danger);" ng-if="!contact.user.agree && contact.submitted">*</span>
+                        </label>
+                        <div class="help-block" ng-if="!contact.user.agree && contact.submitted">
+                            <i class="fas fa-exclamation-circle"></i> You must agree to continue.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" ng-disabled="contact.submitSuccess">
+                        <i class="fas" ng-class="{'fa-spinner fa-spin': contact.submitSuccess, 'fa-paper-plane': !contact.submitSuccess}"></i>
+                        {{ contact.submitSuccess ? 'Sending…' : 'Send Message' }}
+                    </button>
+
+                    <div ng-if="contact.submitSuccess" style="margin-top:16px;padding:14px 18px;background:var(--task-bg);border-radius:14px;color:var(--text-primary);border:1px solid var(--border-color);">
+                        <i class="fas fa-check-circle" style="color:var(--success);"></i> Thanks, {{ contact.user.name }}! Your message was sent (demo).
+                    </div>
+
+                    <div ng-if="contact.submitted && contactForm.$invalid" style="margin-top:16px;padding:12px 16px;background:var(--task-bg);border-radius:12px;color:var(--danger);font-size:.88rem;border:1px solid var(--border-color);">
+                        <i class="fas fa-exclamation-triangle"></i> Please fix the errors above before submitting.
+                    </div>
+                </form>
+            </div>
+
+            <div>
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-info-circle"></i> Form State
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.9rem;">
+                        <span class="text-muted">Valid:</span>
+                        <span><span class="badge" ng-class="{'badge-success': contactForm.$valid, 'badge-danger': contactForm.$invalid}">{{ contactForm.$valid }}</span></span>
+                        <span class="text-muted">Dirty:</span>
+                        <span><span class="badge" ng-class="{'badge-success': contactForm.$dirty, 'badge-danger': !contactForm.$dirty}">{{ contactForm.$dirty }}</span></span>
+                        <span class="text-muted">Touched:</span>
+                        <span><span class="badge" ng-class="{'badge-success': contactForm.$touched, 'badge-danger': !contactForm.$touched}">{{ contactForm.$touched }}</span></span>
+                        <span class="text-muted">Submitted:</span>
+                        <span><span class="badge" ng-class="{'badge-success': contact.submitted, 'badge-danger': !contact.submitted}">{{ contact.submitted }}</span></span>
+                    </div>
+                    <hr style="margin:16px 0;border-color:var(--border-color);" />
+                    <p style="font-size:.85rem;color:var(--text-muted);">
+                        <i class="fas fa-code"></i> Built‑in Angular validation:
+                        <code>ng-valid</code>, <code>ng-invalid</code>, <code>ng-dirty</code>, <code>ng-touched</code>
+                    </p>
+                </div>
+
+                <div class="card mt-24">
+                    <div class="card-title">
+                        <i class="fas fa-eye"></i> Live Preview
+                        <span class="badge" style="margin-left:auto;">two‑way binding</span>
+                    </div>
+                    <div style="background:var(--task-bg);padding:14px 18px;border-radius:12px;border:1px solid var(--border-color);">
+                        <p><strong>Name:</strong> {{ contact.user.name || '—' }}</p>
+                        <p><strong>Email:</strong> {{ contact.user.email || '—' }}</p>
+                        <p><strong>Message:</strong> {{ contact.user.message || '—' | truncate:30 }}</p>
+                        <p><strong>Agreed:</strong> <span class="badge" ng-class="{'badge-success': contact.user.agree, 'badge-danger': !contact.user.agree}">{{ contact.user.agree ? 'Yes' : 'No' }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+</body>
+</html>
